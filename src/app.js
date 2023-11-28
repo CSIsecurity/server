@@ -13,9 +13,6 @@ hbs.registerPartials(__dirname + '/views/partials', function (err) {});
 app.set('view engine', 'hbs');
 app.set("views", __dirname + "/views");
 
-// settings
-app.set('port', process.env.PORT || 4000);
-
 
 // middlewares
 app.use(morgan('dev'));
