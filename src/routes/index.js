@@ -2,12 +2,12 @@ const { Router } = require('express');
 const router = Router();
 const admin = require('firebase-admin');
 
-var serviceAccount = require("../../node-firebase-7b1aa-firebase-adminsdk-jxnpn-91bb2744af.json");
+var serviceAccount = require("../../csi2-a53ef-firebase-adminsdk-eng95-53e7e2eb94.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     //credential: admin.credential.applicationDefault(),
-    databaseURL: 'https://node-firebase-7b1aa-default-rtdb.firebaseio.com/'
+    databaseURL: 'https://csi2-a53ef-firebase-adminsdk-eng95-53e7e2eb94.json/'
 });
 
 const db = admin.database();

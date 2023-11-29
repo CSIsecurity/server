@@ -1,4 +1,4 @@
-$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\manue\OneDrive\Pictures\CSI\firebase_node\node-firebase-7b1aa-firebase-adminsdk-jxnpn-91bb2744af.json"
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\manue\OneDrive\Pictures\CSI\firebase_node\csi2-a53ef-firebase-adminsdk-eng95-53e7e2eb94.json"
 
 Documentación dispositivo
 

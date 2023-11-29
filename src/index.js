@@ -32,12 +32,12 @@ const server = net.createServer((socket) => {
   });
 });
 
-// const PORT = 4000;
-// const ADDRESS = '0.0.0.0';
+const PORT = 4000;
+const ADDRESS = '0.0.0.0';
 
-// app.listen(PORT, ADDRESS, () => {
-//   console.log(`Server listening on ${ADDRESS}:${PORT}`);
-// });
+app.listen(PORT, ADDRESS, () => {
+  console.log(`Server listening on ${ADDRESS}:${PORT}`);
+});
 
 function parseMessage(message) {
   const [manufacturer, deviceId, contentLength, content] = message
