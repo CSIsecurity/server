@@ -8,10 +8,10 @@ const server = net.createServer((socket) => {
     // Parse the received message
     const [manufacturer, deviceId, contentLength, content] = parseMessage(message);
 
-    console.log(`Manufacturer: ${manufacturer}`);
+/*     console.log(`Manufacturer: ${manufacturer}`);
     console.log(`Device ID: ${deviceId}`);
     console.log(`Content Length: ${contentLength}`);
-    console.log(`Content: ${content}`);
+    console.log(`Content: ${content}`); */
 
     // Process the message or send a response as needed
     // ...

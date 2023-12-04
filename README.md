@@ -51,3 +51,6 @@ Capas de un TCP/IP
 -Capa de Internet
 -Capa de transporte
 -Capa de aplicaciones
+
+
+Direccion IP firebase url: 199.36.158.100:443  ---  csi2-a53ef.web.app
