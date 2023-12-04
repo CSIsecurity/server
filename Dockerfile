@@ -4,4 +4,4 @@ COPY . .
 RUN npm install
 
 EXPOSE 4000
-CMD ["node", "./src/routes/f29C.js"]
+CMD ["node", "index.js"]
