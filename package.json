@@ -1,10 +1,11 @@
 {
   "name": "firebase_node",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/routes/fa29c.js"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
