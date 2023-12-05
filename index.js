@@ -52,6 +52,7 @@ const server = net.createServer((socket) => {
         const response = `[3G*${deviceId}*0002*LK]`;
         socket.write(response);
         console.log(`Command ${content[0]}, requires response: ${response}`);
+        return;
       }
 
       socket.end();
