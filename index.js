@@ -51,7 +51,7 @@ const server = net.createServer((socket) => {
       if (command && command.responseRequired) {
         const response = `[3G*${deviceId}*0002*LK]`;
         socket.write(response);
-        console.log(`Command ${content[0]}, requires response`);
+        console.log(`Command ${content[0]}, requires response: ${response}`);
       }
 
       socket.end();
@@ -60,7 +60,7 @@ const server = net.createServer((socket) => {
     socket.end(); 
   });
 
-  // Si la conección se cierra
+  // Si la conexión se cierra
   socket.on("end", () => {
     console.log("Client disconnected");
   });
