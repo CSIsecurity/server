@@ -1,6 +1,10 @@
 import * as net from "net";
-import admin from 'firebase-admin';
-import {COMMANDS} from './src/constants/commands.constants.js';
+import admin from "firebase-admin";
+import { COMMANDS } from "./src/constants/commands.constants.js";
+import {
+  LOCATION,
+  LOCATION_COMMANDS,
+} from "./src/constants/location.constants.js";
 
 // Obtener el key del service account de firebase
 import serviceAccount from "./config/key.json" assert { type: "json" };
@@ -8,7 +12,6 @@ import serviceAccount from "./config/key.json" assert { type: "json" };
 // URL de la base de datos de firebase
 const DATABASE_URL =
   "https://csi2-a53ef-default-rtdb.asia-southeast1.firebasedatabase.app/";
-
 
 //inicializar la conexión usando el key y la url de la base datos
 const firebaseApp = admin.initializeApp({
@@ -29,13 +32,12 @@ const server = net.createServer((socket) => {
     console.log(`Received data: ${message}`);
 
     // Parse the received message
-    const [manufacturer, deviceId, contentLength, content] =
+    const [manufacturer, deviceId, contentLength, content, parsedContent] =
       parseMessage(message);
 
     // Si el mensaje recibido contiene la propiedad content y un deviceId
     if (content && deviceId) {
       const command = COMMANDS[content[0]];
-    
 
       // Si el command que se recibió requiere logging
       if (command && command.log) {
@@ -44,6 +46,7 @@ const server = net.createServer((socket) => {
         logRef.push({
           data: content,
           deviceId: deviceId,
+          parsedData: parsedContent,
         });
       }
 
@@ -54,10 +57,9 @@ const server = net.createServer((socket) => {
         console.log(`Command ${content[0]}, requires response: ${response}`);
       }
 
-      socket.write('');
-
-    }  
-    socket.write(''); 
+      socket.end();
+    }
+    socket.end();
   });
 
   // Si la conexión se cierra
@@ -76,6 +78,19 @@ function parseMessage(message) {
   let [manufacturer, deviceId, contentLength, content] = message
     .slice(1, -1) // Remove brackets
     .split("*");
-  content = content.split(",");
-  return [manufacturer, deviceId, contentLength, content];
+  let parsedContent = {};
+    content = content.split(",");
+  // Verifica si el contenido existe y si el primer elemento está incluido en LOCATION_COMMANDS(comandos que contienen ubicación).
+  if (content && content[0] && LOCATION_COMMANDS.includes(content[0])) {
+    console.log(content[0]);
+    // Crea un nuevo objeto parsedContent asignando a cada propiedad un nombre (location) y un valor  correspondiente extraído de content.
+    parsedContent = LOCATION.reduce((object, value, index) => {
+      const key = value;
+      object[key] = content[index];
+      return object;
+    }, {});
+    // Imprime parsedContent en la consola
+    console.log(parsedContent);
+  }
+  return [manufacturer, deviceId, contentLength, content, parsedContent];
 }

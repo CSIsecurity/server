@@ -3,7 +3,7 @@ export const COMMANDS = {
     responseRequired: true,
     log: true,
   },
-  TEST: {
+  UD: {
     responseRequired: false,
     log: true,
   },
