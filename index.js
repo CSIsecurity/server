@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import * as net from "net";
 import * as dotenv from "dotenv";
 import { MongoClient, ServerApiVersion } from "mongodb";
@@ -48,6 +49,7 @@ const server = net.createServer((socket) => {
         console.log(`Command ${content[0]}, requires logging`);
 
         const logData = {
+          date: DateTime.now().toISO(),
           data: content,
           deviceId: deviceId,
           parsedData: parsedContent,
