@@ -1,57 +1,35 @@
 import * as net from "net";
-import  { MongoClient, ServerApiVersion } from "mongodb";
+import * as dotenv from "dotenv";
+import { MongoClient, ServerApiVersion } from "mongodb";
 import { COMMANDS } from "./src/constants/commands.constants.js";
 import {
   LOCATION,
   LOCATION_COMMANDS,
 } from "./src/constants/location.constants.js";
-
-
-const uri = "mongodb+srv://realtimecsiserver:NQ2KydALDO8swD22@clustercsi.5gy2biq.mongodb.net/?retryWrites=true&w=majority";
+dotenv.config();
+const uri = process.env.MONGO_URI;
+const dbName = process.env.DB_NAME;
+console.log("dbname:", dbName);
+console.log("uri:", uri);
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+await client.connect();
 
-
-/* // Obtener el key del service account de firebase
-import serviceAccount from "./config/key.json" assert { type: "json" };
-
-// URL de la base de datos de firebase
-const DATABASE_URL =
-  "https://csi2-a53ef-default-rtdb.asia-southeast1.firebasedatabase.app/";
-
-//inicializar la conexión usando el key y la url de la base datos
-const firebaseApp = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: DATABASE_URL,
-});
-
-// Obtener una referencia a la base de datos
-const db = admin.database();
-// Esta referencia es el sub-nivel en el que se va a agregar información de logs
-const ref = db.ref("/logs"); */
 
 // Inicializar el servidor
 const server = net.createServer((socket) => {
+  socket.on("connect", (data) => {
+    console.log(`Connected:`, data)
+  })
+
+
   // Cuando se reciben datos
   socket.on("data", (data) => {
     const message = data.toString();
@@ -68,12 +46,18 @@ const server = net.createServer((socket) => {
       // Si el command que se recibió requiere logging
       if (command && command.log) {
         console.log(`Command ${content[0]}, requires logging`);
-        const logRef = ref.child("test");
-        logRef.push({
+
+        const logData = {
           data: content,
           deviceId: deviceId,
           parsedData: parsedContent,
-        });
+        };
+
+        const collection = client.db(dbName).collection('logTest');
+
+        collection.insertOne(logData);
+
+
       }
 
       // Si el command que se recibió requiere enviar una respuesta devuelta al cliente
@@ -95,8 +79,8 @@ const server = net.createServer((socket) => {
   });
 });
 
-const PORT = 4000;
-const ADDRESS = "0.0.0.0";
+const PORT = process.env.PORT;
+const ADDRESS = process.env.ADDRESS;
 server.listen(PORT, ADDRESS, () => {
   console.log(`Server listening on ${ADDRESS}:${PORT}`);
 });
@@ -106,7 +90,7 @@ function parseMessage(message) {
     .slice(1, -1) // Remove brackets
     .split("*");
   let parsedContent = {};
-    content = content.split(",");
+  content = content.split(",");
   // Verifica si el contenido existe y si el primer elemento está incluido en LOCATION_COMMANDS(comandos que contienen ubicación).
   if (content && content[0] && LOCATION_COMMANDS.includes(content[0])) {
     console.log(content[0]);
