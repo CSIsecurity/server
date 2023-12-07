@@ -53,7 +53,7 @@ const server = net.createServer((socket) => {
           parsedData: parsedContent,
         };
 
-        const collection = client.db(dbName).collection('logTest');
+        const collection = client.db(dbName).collection(command.collection);
 
         collection.insertOne(logData);
 
