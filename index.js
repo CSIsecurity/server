@@ -10,8 +10,6 @@ import {
 dotenv.config();
 const uri = process.env.MONGO_URI;
 const dbName = process.env.DB_NAME;
-console.log("dbname:", dbName);
-console.log("uri:", uri);
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -64,8 +62,7 @@ const server = net.createServer((socket) => {
 
       // Si el command que se recibió requiere enviar una respuesta devuelta al cliente
       if (command && command.responseRequired) {
-        // const response = `[3G*${deviceId}*0002*LK]`;
-        const response = `[3G*${deviceId}*0002*CR]`;
+        const response = `[3G*${deviceId}*0002*LK]`;
         socket.write(response);
         console.log(`Command ${content[0]}, requires response: ${response}`);
       }
