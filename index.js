@@ -1,12 +1,38 @@
 import * as net from "net";
-import admin from "firebase-admin";
+const { MongoClient, ServerApiVersion } = require('mongodb');
 import { COMMANDS } from "./src/constants/commands.constants.js";
 import {
   LOCATION,
   LOCATION_COMMANDS,
 } from "./src/constants/location.constants.js";
 
-// Obtener el key del service account de firebase
+
+const uri = "mongodb+srv://realtimecsiserver:NQ2KydALDO8swD22@clustercsi.5gy2biq.mongodb.net/?retryWrites=true&w=majority";
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
+
+
+/* // Obtener el key del service account de firebase
 import serviceAccount from "./config/key.json" assert { type: "json" };
 
 // URL de la base de datos de firebase
@@ -22,7 +48,7 @@ const firebaseApp = admin.initializeApp({
 // Obtener una referencia a la base de datos
 const db = admin.database();
 // Esta referencia es el sub-nivel en el que se va a agregar información de logs
-const ref = db.ref("/logs");
+const ref = db.ref("/logs"); */
 
 // Inicializar el servidor
 const server = net.createServer((socket) => {
@@ -52,7 +78,8 @@ const server = net.createServer((socket) => {
 
       // Si el command que se recibió requiere enviar una respuesta devuelta al cliente
       if (command && command.responseRequired) {
-        const response = `[3G*${deviceId}*0002*LK]`;
+        // const response = `[3G*${deviceId}*0002*LK]`;
+        const response = `[3G*${deviceId}*0002*CR]`;
         socket.write(response);
         console.log(`Command ${content[0]}, requires response: ${response}`);
       }
