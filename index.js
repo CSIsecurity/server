@@ -1,5 +1,5 @@
 import * as net from "net";
-const { MongoClient, ServerApiVersion } = require('mongodb');
+import  { MongoClient, ServerApiVersion } from "mongodb";
 import { COMMANDS } from "./src/constants/commands.constants.js";
 import {
   LOCATION,
