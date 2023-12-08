@@ -34,4 +34,14 @@ export const COMMANDS = {
     log: true,
     collection: "location",
   },
+  TKQ: {
+    responseRequired: true,
+    log: true,
+    collection: "location",
+  },
+  TKQ2: {
+    responseRequired: true,
+    log: true,
+    collection: "location",
+  },
 };

@@ -62,7 +62,7 @@ const server = net.createServer((socket) => {
 
       // Si el command que se recibió requiere enviar una respuesta devuelta al cliente
       if (command && command.responseRequired) {
-        const response = `[3G*${deviceId}*0002*LK]`;
+        const response = `[3G*${deviceId}*0002*${content[0]}]`;
         socket.write(response);
         console.log(`Command ${content[0]}, requires response: ${response}`);
         return;
