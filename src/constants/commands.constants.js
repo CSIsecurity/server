@@ -29,5 +29,9 @@ export const COMMANDS = {
     log: true,
     collection: "location",
   },
-
+  AL_LTE: {
+    responseRequired: true,
+    log: true,
+    collection: "location",
+  },
 };
