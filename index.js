@@ -3,7 +3,7 @@ import * as net from "net";
 import * as dotenv from "dotenv";
 import { MongoClient, ServerApiVersion } from "mongodb";
 import { COMMANDS } from "./src/constants/commands.constants.js";
-import { Logtail } from "@logtail/js";
+import  {Node as Logtail}  from "@logtail/js";
 import {
   LOCATION,
   LOCATION_COMMANDS,
