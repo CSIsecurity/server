@@ -23,7 +23,6 @@ export const LOCATION = [
   "positioningAccuracy",
 ]
 
-
 export const LOCATION_COMMANDS = [
   "UD_WCDMA",
   "UD_TDSCDMA",
@@ -31,8 +30,7 @@ export const LOCATION_COMMANDS = [
   "UD",
   "UD2",
   "UD3",
-  "AL"
-
+  "AL",
 ]
 
 

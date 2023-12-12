@@ -45,3 +45,10 @@ export const COMMANDS = {
     collection: "location",
   },
 };
+
+
+export const CONFIG_COMMANDS = [
+  'TKQ',
+  'CONFIG',
+  'LK'
+];
