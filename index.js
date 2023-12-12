@@ -61,7 +61,7 @@ const server = net.createServer((socket) => {
 
       // Si el comando no es de configuración quiero parsearlo y extraer los MACs que encuentre
       if (!CONFIG_COMMANDS.includes(command)) {
-        obtenerCoordenadas(data, deviceId);
+        obtenerCoordenadas(message, deviceId);
       }
 
       // Si el command que se recibió requiere logging
