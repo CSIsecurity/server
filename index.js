@@ -40,7 +40,7 @@ const server = net.createServer((socket) => {
   // Cuando se reciben datos
   socket.on("data", (data) => {
     // Crear un log al recibir cualquier mensaje
-    logtail, info("Message received", { message: data });
+    logtail.info("Message received", { message: data });
 
     const message = data.toString();
 
