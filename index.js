@@ -34,13 +34,13 @@ await client.connect();
 const server = net.createServer((socket) => {
   // Cuando se reciben datos
   socket.on("data", (data) => {
-    const message = data.toString();
+    const socketMessage = data.toString();
 
     // Crear un log al recibir cualquier mensaje
-    logtail.info("Message received", { message: message });
+    logtail.info("Message received", { socketData: socketMessage });
 
     // Extraer los fields de acuerdo al protocolo de comunicación del dispositivo
-    const [deviceId, content, parsedContent] = parseMessage(message);
+    const [deviceId, content, parsedContent] = parseMessage(socketMessage);
 
     // Crear un log con los datos parseados
     logtail.info("Data Parsed", {
@@ -57,7 +57,7 @@ const server = net.createServer((socket) => {
       // Si el comando no es de configuración quiero parsearlo y extraer los MACs que encuentre
       if (!CONFIG_COMMANDS.includes(command)) {
         // Envío el mensaje recibido sin brackets
-        getLocationFromGoogle(message.slice(1, -1), deviceId);
+        getLocationFromGoogle(socketMessage.slice(1, -1), deviceId);
       }
 
       // Si el command que se recibió requiere logging
