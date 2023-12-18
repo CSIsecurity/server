@@ -46,7 +46,6 @@ export const COMMANDS = {
   },
 };
 
-
 export const CONFIG_COMMANDS = [
   'TKQ',
   'CONFIG',

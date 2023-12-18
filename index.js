@@ -13,7 +13,8 @@ import {
 } from "./src/constants/location.constants.js";
 
 dotenv.config();
-const googleKey = process.env.GOOGLE_KEY;
+
+const googleKey = process.env.GOOGLE_API_KEY;
 const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
 const uri = process.env.MONGO_URI;
 const dbName = process.env.DB_NAME;
@@ -31,24 +32,18 @@ await client.connect();
 
 // Inicializar el servidor
 const server = net.createServer((socket) => {
-  socket.on("connection", (data) => {
-    console.log(`Connected:`, data);
-  });
-  socket.on("connect", (data) => {
-    console.log(`Connected:`, data);
-  });
   // Cuando se reciben datos
   socket.on("data", (data) => {
-    // Crear un log al recibir cualquier mensaje
-    logtail.info("Message received", { message: data });
-
     const message = data.toString();
 
-    // Extraer los campos de acuerdo al protocolo de comunicación del dispositivo
+    // Crear un log al recibir cualquier mensaje
+    logtail.info("Message received", { message: message });
+
+    // Extraer los fields de acuerdo al protocolo de comunicación del dispositivo
     const [deviceId, content, parsedContent] = parseMessage(message);
 
     // Crear un log con los datos parseados
-    logtail.info("Received data", {
+    logtail.info("Data Parsed", {
       deviceId: deviceId,
       content: content,
       parsedContent: parsedContent,
@@ -61,7 +56,8 @@ const server = net.createServer((socket) => {
 
       // Si el comando no es de configuración quiero parsearlo y extraer los MACs que encuentre
       if (!CONFIG_COMMANDS.includes(command)) {
-        obtenerCoordenadas(message, deviceId);
+        // Envío el mensaje recibido sin brackets
+        getLocationFromGoogle(message.slice(1, -1), deviceId);
       }
 
       // Si el command que se recibió requiere logging
@@ -92,11 +88,11 @@ const server = net.createServer((socket) => {
         socket.write(response);
         return;
       }
-      console.log("Invalid command received: ", content[0]);
+      logtail.error("Invalid command received: ", message);
       socket.end();
       return;
     }
-    console.log("Invalid message received: ", message);
+    logtail.error("Invalid message received: ", message);
     socket.end();
   });
 
@@ -120,59 +116,54 @@ function parseMessage(message) {
   content = content.split(",");
   // Verifica si el contenido existe y si el primer elemento está incluido en LOCATION_COMMANDS(comandos que contienen ubicación).
   if (content && content[0] && LOCATION_COMMANDS.includes(content[0])) {
-    console.log(content[0]);
     // Crea un nuevo objeto parsedContent asignando a cada propiedad un nombre (location) y un valor  correspondiente extraído de content.
     parsedContent = LOCATION.reduce((object, value, index) => {
       const key = value;
       object[key] = content[index];
       return object;
     }, {});
-    // Imprime parsedContent en la consola
-    console.log(parsedContent);
   }
   return [deviceId, content, parsedContent];
 }
 
-async function obtenerCoordenadas(message, deviceId) {
-  let decibeles = [];
-  let macsEncontradas = [];
-  let campos = message.split(",");
-  let id_temp = campos[0].split("*");
-  let id_dispositivo = id_temp[1];
-  let bateria = campos[13];
+async function getLocationFromGoogle(message, deviceId) {
+  let dbs = [];
+  let foundMacs = [];
+  let fields = message.split(",");
+  let battery = fields[13];
 
-  const regex = new RegExp(
-    /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9a-fA-F]{4}.[0-9a-fA-F]{4}.[0-9a-fA-F]{4})$/
-  );
+  const regex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
 
-  macsEncontradas = campos.filter((elemento, indice) => {
-    //return elemento > 10;
-    if (elemento.match(regex)) {
-      decibeles.push(campos[indice + 1]);
-      return elemento;
+  foundMacs = fields.filter((field, index) => {
+    if (field.match(regex)) {
+      // Si se encontró un mac, dbs llega en el siguiente campo luego del mac encontrado (index + 1)
+      dbs.push(fields[index + 1]);
+      return field;
     }
   });
 
-  //prepara el objeto data para Google
-  let objetosMac = [];
+  console.log(foundMacs)
 
-  for (let i = 0; i < macsEncontradas.length; i++) {
-    objetosMac.push({
-      macAddress: macsEncontradas[i],
-      signalStrength: decibeles[i],
+  //prepara el objeto data para Google
+  let macObjects = [];
+
+  for (let i = 0; i < foundMacs.length; i++) {
+    macObjects.push({
+      macAddress: foundMacs[i],
+      signalStrength: dbs[i],
       signalToNoiseRatio: 0,
     });
   }
 
+  // Dar formato para enviar a google
   const datosEnviar = {
     considerIp: "false",
-    wifiAccessPoints: objetosMac,
+    wifiAccessPoints: macObjects,
   };
 
-  //Si existen objetosMac, enviar a google
-  if (objetosMac.length > 1) {
-    await fetch(
-      `https://www.googleapis.com/geolocation/v1/geolocate?key=${googleKey}`,
+  //Si existen macObjects, enviar a google
+  if (macObjects[0]) {
+    await fetch(`https://www.googleapis.com/geolocation/v1/geolocate?key=${googleKey}`,
       {
         method: "POST",
         headers: {
@@ -180,34 +171,37 @@ async function obtenerCoordenadas(message, deviceId) {
         },
         body: JSON.stringify(datosEnviar),
       }
+      
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        if (!data.location) {
+          const logData = {
+            data: data,
+          }
+          if (data.error && data.error.errors) {
+            logData.errors = data.error.errors;
+          }
+          logtail.error("Sin Ubicación API GOOGLE", logData);
 
-        const datosPosicion = {
-          latitud: data.location.lat,
-          longitud: data.location.lng,
-          token: id_dispositivo,
-          fk_id_usuario_cliente: "NA",
-          origen: "tracker",
-          id_dispositivo: id_dispositivo,
-          bateria: bateria,
-          precision: data.accuracy,
-        };
-
+          return;
+        }
+    
         // Formar el objeto para enviar a mongo
+        console.log(data)
         const logData = {
           date: DateTime.now().setZone("America/Bogota").toISO(),
           data: message,
           deviceId: deviceId,
-          parsedData: datosPosicion,
           // Si positionStatus es G fue obtenida desde el API de google
           GPSPositioningStatus: "G",
-          location: datosPosicion,
+          location: {
+            latitude: data.location.lat,
+            longitude: data.location.lng,
+            battery: battery,
+            precision: data.accuracy,
+          },
         };
-
-        console.log(data);
 
         // Enviar los datos a la base de datos
         const collection = client.db(dbName).collection("location");
@@ -215,7 +209,9 @@ async function obtenerCoordenadas(message, deviceId) {
         collection.insertOne(logData);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        logtail.error("Error API Google", {
+          error: error
+        });
       });
   }
 }
